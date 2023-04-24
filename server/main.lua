@@ -34,10 +34,6 @@ AddEventHandler('playerConnecting', function(playerName, setKickReason, deferral
 end)
 
 
-RegisterCommand('info', function(source, args, rawCommand)
-    getPlayerMoney(source)
-end, false)
-
 function setPlayerJob(player, job)
     local playerId = getPlayerId(player)
     exports.oxmysql:execute('UPDATE users SET job = ? WHERE id = ?', {job, playerId})
@@ -79,3 +75,4 @@ function getPlayerId(player)
     end
     return nil
 end
+
