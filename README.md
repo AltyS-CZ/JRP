@@ -1,4 +1,4 @@
-# JRP
+# JRP Framework
 
 ## INFO
 
