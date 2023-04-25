@@ -10,6 +10,8 @@ Look at wiki for installation help
 https://github.com/AltyS-CZ/Jax-s-Custom-Framework/wiki
 
 SUPPORT IS AVAILABLE IN MY DISCORD SERVER.
+https://discord.gg/D2t9jdC2wV
+
 
 ### DISCLAIMER:
 Please Note: This framework is built with Chat GPT4 AI and will continue working with AI for future updates. Also, framework is under heavy development. Expect plenty of bugs and errors.
