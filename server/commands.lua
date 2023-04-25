@@ -110,5 +110,5 @@ RegisterCommand("car", function(source, args, rawCommand)
     local playerPed = GetPlayerPed(source)
     local coords = GetEntityCoords(playerPed)
     TriggerClientEvent("spawnVehicle", -1, coords, model) -- Spawn the vehicle for all clients
-  end, true) -- Set the last argument to true to make the command restricted to admin players
+end, true) -- Set the last argument to true to make the command restricted to admin players
   
