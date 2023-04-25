@@ -109,29 +109,7 @@ function SetPlayerMoney(playerId, moneyType, amount)
     exports.oxmysql:execute('UPDATE users SET ' .. moneyType .. ' = ? WHERE identifier = ?', {amount, identifier})
 end
 
+-------------------------------------------------------
 
-Citizen.CreateThread(function()
-    while not HasModelLoaded(modelHash) do
-        RequestModel(modelHash)
-        Citizen.Wait(0)
-    end
-    local vehicle = CreateVehicle(modelHash, x, y, z, heading, true, false)
-end)
 
-function HasModelLoaded(model)
-    return IsModelValid(model) and HasModelLoadedSuccessfully(model)
-end
 
-function HasModelLoadedSuccessfully(model)
-    if not IsModelInCdimage(model) then
-        return true
-    end
-
-    RequestModel(model)
-
-    while not HasModelLoaded(model) do
-        Citizen.Wait(0)
-    end
-
-    return true
-end
