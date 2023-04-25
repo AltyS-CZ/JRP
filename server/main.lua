@@ -5,6 +5,7 @@ AddEventHandler('onResourceStart', function(resourceName)
     if (GetCurrentResourceName() ~= resourceName) then
         return
     end
+    print('^5 JRP Framework has been sucessfully initialized.')
 end)
 
 -- Add new player to the database
@@ -19,10 +20,11 @@ AddEventHandler('playerConnecting', function(playerName, setKickReason, deferral
     }, function(result)
         if result[1] == nil then
             -- Add new player to the database
-            MySQL.Async.execute('INSERT INTO users (identifier, cash, bank, dirty_money) VALUES (@identifier, @cash, @bank, @dirty_money)', {
+            exports.oxmysql:execute('INSERT INTO users (identifier, job, cash, bank, dirty_money) VALUES (@identifier, @job, @cash, @bank, @dirty_money)', {
                 ['@identifier'] = identifier,
-                ['@cash'] = 0,
-                ['@bank'] = 0,
+                ["@job"] = "Citizen",
+                ['@cash'] = Config.StartingCash,
+                ['@bank'] = Config.StartingBank,
                 ['@dirty_money'] = 0
             }, function(rowsChanged)
                 print('new user added to database')
@@ -34,27 +36,27 @@ AddEventHandler('playerConnecting', function(playerName, setKickReason, deferral
 end)
 
 
-function setPlayerJob(player, job)
-    local playerId = getPlayerId(player)
-    exports.oxmysql:execute('UPDATE users SET job = ? WHERE id = ?', {job, playerId})
-end
-
 local cash = 0
 local bank = 0
 local dirtyMoney = 0
 
-function getPlayerMoney(player)
-    local playerId = getPlayerId(player)
-    local identifiers = GetPlayerIdentifiers(playerId)
-    local identifier = identifiers[1]
-    exports.oxmysql:execute('SELECT cash, bank, dirty_money, job FROM users WHERE identifier = ?', {identifier}, function(result)
-        cash = result[1].cash
-        bank = result[1].bank
-        dirtyMoney = result[1].dirty_money
-        local job = result[1].job
-        TriggerClientEvent("custom_economy:updateMoneyDisplay", playerId, cash, bank, dirtyMoney, job)
+function GetPlayerMoney(source)
+    local player = GetPlayerIdentifier(source)
+    local result = nil
+
+    exports.oxmysql:execute('SELECT cash, bank, dirty_money FROM users WHERE identifier = ?', {player}, function(data)
+        result = data[1]
     end)
+
+    while result == nil do
+        Citizen.Wait(0)
+    end
+
+    return result.cash, result.bank, result.dirty_money
 end
+
+
+
 
 RegisterServerEvent("custom_economy:updateMoney")
 AddEventHandler("custom_economy:updateMoney", function()
@@ -76,3 +78,86 @@ function getPlayerId(player)
     return nil
 end
 
+-- Function to update the player's money display
+function updateMoneyDisplay(source)
+    local identifier = GetPlayerIdentifier(source, 0)
+    local moneyData = getPlayerMoney(identifier)
+    TriggerClientEvent("custom_economy:updateMoneyDisplay", source, moneyData)
+end
+
+-- Event to handle giving money to a player
+RegisterServerEvent("custom_economy:giveMoney")
+AddEventHandler("custom_economy:giveMoney", function(amount, account)
+    local source = tonumber(source)
+    local identifier = GetPlayerIdentifier(source, 0)
+    local moneyData = getPlayerMoney(identifier)
+
+    if account == "cash" then
+        moneyData.cash = moneyData.cash + amount
+    elseif account == "bank" then
+        moneyData.bank = moneyData.bank + amount
+    elseif account == "dirty" then
+        moneyData.dirtyMoney = moneyData.dirtyMoney + amount
+    end
+
+    updatePlayerMoney(identifier, moneyData)
+    updateMoneyDisplay(source)
+end)
+
+function SetPlayerMoney(playerId, moneyType, amount)
+    local identifier = GetPlayerIdentifier(playerId)
+    exports.oxmysql:execute('UPDATE users SET ' .. moneyType .. ' = ? WHERE identifier = ?', {amount, identifier})
+end
+
+
+Citizen.CreateThread(function()
+    while not HasModelLoaded(modelHash) do
+        RequestModel(modelHash)
+        Citizen.Wait(0)
+    end
+    local vehicle = CreateVehicle(modelHash, x, y, z, heading, true, false)
+end)
+
+function HasModelLoaded(model)
+    return IsModelValid(model) and HasModelLoadedSuccessfully(model)
+end
+
+function HasModelLoadedSuccessfully(model)
+    if not IsModelInCdimage(model) then
+        return true
+    end
+
+    RequestModel(model)
+
+    while not HasModelLoaded(model) do
+        Citizen.Wait(0)
+    end
+
+    return true
+end
+
+
+
+
+local function getPlayerData(player, callback)
+    local playerId = tonumber(player)
+    local identifiers = GetPlayerIdentifiers(playerId)
+    local identifier = identifiers[1]
+    exports.oxmysql:execute('SELECT * FROM users WHERE identifier = ?', {identifier}, function(result)
+        if result[1] ~= nil then
+            local data = {
+                identifier = result[1].identifier,
+                license = result[1].license,
+                name = result[1].name,
+                job = result[1].job or "Citizen",
+                cash = result[1].cash,
+                bank = result[1].bank,
+                dirty_money = result[1].dirty_money,
+                position = json.decode(result[1].position) or nil
+            }
+            callback(data)
+        else
+            callback(nil)
+        end
+    end)
+end
