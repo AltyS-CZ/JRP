@@ -1,3 +1,10 @@
+-- Shows a notification on the player's screen 
+function ShowNotification( text )
+    SetNotificationTextEntry("STRING")
+    AddTextComponentSubstringPlayerName(text)
+    DrawNotification(false, false)
+end
+
 RegisterCommand('car', function(source, args, rawCommand)
     if IsPlayerAceAllowed(source, "admin") then
         local x,y,z = table.unpack(GetOffsetFromEntityInWorldCoords(PlayerPedId(), 0.0, 8.0, 0.5))
