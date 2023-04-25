@@ -19,7 +19,7 @@ local jobs = {
 
 
 local lastSalaryPayment = os.time()
-local salaryIntervalSeconds = 60 -- change this value to set the interval between salary payments in seconds
+local salaryIntervalSeconds = 600 -- change this value to set the interval between salary payments in seconds
 
 
 -- Function to pay out salaries to all players with a job
@@ -107,24 +107,15 @@ end)
 
 Citizen.CreateThread(function()
     while true do
-      Citizen.Wait(1000)
-      if (os.time() - lastSalaryPayment) >= salaryIntervalSeconds then
+        Wait(salaryIntervalSeconds * 1000)
         PaySalaries()
-        lastSalaryPayment = os.time()
-      end
     end
-  end)
+end)
   
 
 
 -- Functions
  
-function GetJob(player)
-    local identifier = GetPlayerIdentifier(player)
-    local result = exports.oxmysql:execute("SELECT job FROM users WHERE identifier = @identifier", {["@identifier"] = identifier})
-    return result
-end
-
 
 function GiveSalary()
     for _, player in ipairs(GetPlayers()) do
@@ -161,15 +152,13 @@ function GiveSalary()
 end
 
 
-
-
-  
-  
-  
-  
-
-  
  
+function GetJob(player)
+    local identifier = GetPlayerIdentifier(player)
+    local result = exports.oxmysql:execute("SELECT job FROM users WHERE identifier = @identifier", {["@identifier"] = identifier})
+    return result
+end
+
   
 -- Register the chat command to display a player's job
 RegisterCommand("job", function(source, args, rawCommand)
