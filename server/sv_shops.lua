@@ -1,8 +1,3 @@
--- WARNING
--- DO NOT TOUCH
--- SHOPS ARE NOT YET READY
-
-
 -- Define shop marker size and color
 local markerSize = {x = 1.5, y = 1.5, z = 0.5}
 local markerColor = {r = 0, g = 128, b = 255, a = 100}
