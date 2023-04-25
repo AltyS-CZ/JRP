@@ -90,16 +90,17 @@ RegisterCommand('tpm', function(source, args)
     end
 end, true)
 
--- Define an Ace permission for the forcesalary command
-AddAceResourceCommand("custom_economy", "forcesalary", function(source, args, rawCommand)
-    -- Check that the player is authorized to run this command
-    if IsPlayerAceAllowed(source, "custom_economy.forcesalary") then
-        -- Trigger the GiveSalary() function to pay out salaries to all players
+-------------------------
+-- Force Salary Command (ADMIN/DEBUG)
+RegisterCommand("forcesalary", function(source, args)
+    -- check if the player executing the command is an admin
+    if IsPlayerAceAllowed(source, "admin") then
+        -- give salary to all players
         GiveSalary()
-        -- Send a confirmation message to the player who executed the command
-        TriggerClientEvent("chat:addMessage", source, { args = { "Economy", "Salaries have been forced for all players." }, color = { 255, 0, 0 } })
+        TriggerClientEvent("chat:addMessage", -1, {args = {"^1SERVER", "All players have received their salary."}})
     else
-        -- Send an error message to the player who executed the command if they're not authorized
-        TriggerClientEvent("chat:addMessage", source, { args = { "Economy", "You are not authorized to use this command." }, color = { 255, 0, 0 } })
+        -- inform the player that they do not have permission to execute the command
+        TriggerClientEvent("chat:addMessage", source, {args = {"^1SERVER", "You do not have permission to execute this command."}})
     end
 end, true)
+
