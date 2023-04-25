@@ -3,7 +3,8 @@
 -------------------------
 
 --INFO COMMAND (ALL)
-
+--- The function must be kept
+-- in order for the info command to work
 local function getPlayerData(player, callback)
     local playerId = tonumber(player)
     local identifiers = GetPlayerIdentifiers(playerId)
