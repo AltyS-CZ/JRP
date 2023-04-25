@@ -1,79 +1,9 @@
--- Admin commands
+-- Commands for Framework
 
+-------------------------
 
-RegisterCommand('givemoney', function(source, args, rawCommand)
-    -- Check if the player has permission to use this command
-    if not IsPlayerAceAllowed(source, 'custom_economy.givemoney') then
-        TriggerClientEvent('chat:addMessage', source, {args = {'^1SYSTEM', 'You do not have permission to use this command.'}})
-        return
-    end
+--INFO COMMAND (ALL)
 
-    -- Check if the command has the correct number of arguments
-    if #args ~= 3 then
-        TriggerClientEvent('chat:addMessage', source, {args = {'^1SYSTEM', 'Invalid syntax. Usage: /givemoney [player ID] [account type] [amount]'}})
-        return
-    end
-
-    -- Get the player ID and account type from the command arguments
-    local playerId = tonumber(args[1])
-    local accountType = args[2]
-    local amount = tonumber(args[3])
-
-    -- Check if the player ID and account type are valid
-    if not playerId or not accountType or (accountType ~= 'cash' and accountType ~= 'bank' and accountType ~= 'dirtymoney') or not amount then
-        TriggerClientEvent('chat:addMessage', source, {args = {'^1SYSTEM', 'Invalid syntax. Usage: /givemoney [player ID] [account type] [amount]'}})
-        return
-    end
-
-    -- Add the money to the player's account in the database
-    exports.oxmysql:execute('UPDATE users SET ' .. accountType .. ' = ' .. accountType .. ' + ? WHERE id = ?', {amount, playerId}, function(result)
-        if result.affectedRows == 1 then
-            TriggerClientEvent('chat:addMessage', source, {args = {'^1SYSTEM', 'You have given $' .. amount .. ' to player ' .. playerId .. ' in their ' .. accountType .. ' account.'}})
-            TriggerClientEvent('custom_economy:updateMoneyDisplay', playerId)
-        else
-            TriggerClientEvent('chat:addMessage', source, {args = {'^1SYSTEM', 'Failed to add money to player account.'}})
-        end
-    end)
-end, true)
-
--- SETJOB COMMAND
-
-RegisterCommand('setjob', function(source, args, rawCommand)
-    if #args ~= 2 then
-        TriggerClientEvent('chat:addMessage', source, {args = {'^1Syntax error: ^7/setjob [player ID] [job]'}})
-        return
-    end
-
-    local playerId = tonumber(args[1])
-    local job = args[2]
-    setPlayerJob(playerId, job)
-
-    TriggerClientEvent('chat:addMessage', source, {args = {'^1Success! ^7Player ' .. playerId .. ' is now a ' .. job}})
-end, true)
-
---INFO COMMAND
-local function getPlayerData(player, callback)
-    local playerId = tonumber(player)
-    local identifiers = GetPlayerIdentifiers(playerId)
-    local identifier = identifiers[1]
-    exports.oxmysql:execute('SELECT * FROM users WHERE identifier = ?', {identifier}, function(result)
-        if result[1] ~= nil then
-            local data = {
-                identifier = result[1].identifier,
-                license = result[1].license,
-                name = result[1].name,
-                job = result[1].job or "Citizen",
-                cash = result[1].cash,
-                bank = result[1].bank,
-                dirty_money = result[1].dirty_money,
-                position = json.decode(result[1].position) or nil
-            }
-            callback(data)
-        else
-            callback(nil)
-        end
-    end)
-end
 
 RegisterCommand("info", function(source, args)
     local player = source
@@ -86,5 +16,90 @@ RegisterCommand("info", function(source, args)
         end
     end)
 end)
+-------------------------
+-- COORDS COMMAND (ADMIN)
+
+RegisterCommand("getpos", function(source, args, rawCommand)
+    if IsPlayerAceAllowed(source, "admin") then
+        local playerPed = GetPlayerPed(source)
+        local playerCoords = GetEntityCoords(playerPed)
+        TriggerClientEvent("chat:addMessage", source, {args = {"^1[Server]", "^7Your position: " .. playerCoords.x .. ", " .. playerCoords.y .. ", " .. playerCoords.z}})
+    else
+        TriggerClientEvent("chat:addMessage", source, {args = {"^1[Server]", "^7You do not have permission to use this command."}})
+    end
+end, true)
 
 
+-- Command to spawn a vehicle by model name
+RegisterCommand("car", function(source, args, rawCommand)
+    -- Check if the player is an admin
+    if IsPlayerAceAllowed(source, "admin") then
+        -- Get the player's coordinates and heading
+        local playerPed = GetPlayerPed(source)
+        local playerPos = GetEntityCoords(playerPed)
+        local playerHeading = GetEntityHeading(playerPed)
+
+        -- Get the model name of the vehicle to spawn
+        local model = args[1]
+
+        -- Check if a model name was provided
+        if model ~= nil then
+            -- Request the model to be loaded
+            RequestModel(model)
+
+            -- Wait for the model to load
+            while not HasModelLoaded(model) do
+                Citizen.Wait(0)
+            end
+
+            -- Spawn the vehicle at the player's location and heading
+            local vehicle = CreateVehicle(model, playerPos, playerHeading, true, false)
+
+            -- Set the vehicle as the player's current vehicle
+            SetPedIntoVehicle(playerPed, vehicle, -1)
+
+            -- Send a message to the player that the vehicle was spawned
+            TriggerClientEvent("chat:addMessage", source, {color = {255, 255, 0}, args = {"Server", "Spawned " .. GetDisplayNameFromVehicleModel(model) .. " at your location."}})
+        else
+            -- Send an error message to the player if no model name was provided
+            TriggerClientEvent("chat:addMessage", source, {color = {255, 0, 0}, args = {"Error", "Invalid model name."}})
+        end
+    end
+end, true)
+
+
+---------------------------
+
+-- TPM (ADMIN)
+
+RegisterCommand("tpc", function(source, args, rawCommand)
+    if IsPlayerAceAllowed(source, "admin") then
+        local playerPed = GetPlayerPed(source)
+        local x = tonumber(args[1])
+        local y = tonumber(args[2])
+        local z = tonumber(args[3])
+        
+        if x ~= nil and y ~= nil and z ~= nil then
+            SetEntityCoords(playerPed, x, y, z)
+            TriggerClientEvent("chat:addMessage", source, {color = {255, 255, 0}, args = {"Server", "Teleported to marker."}})
+        else
+            TriggerClientEvent("chat:addMessage", source, {color = {255, 0, 0}, args = {"Error", "Invalid coordinates."}})
+        end
+    end
+end, true)
+
+RegisterCommand('tpm', function(source, args)
+    if IsPlayerAceAllowed(source, 'admin') then
+        local waypoint = GetFirstBlipInfoId(8)
+        if DoesBlipExist(waypoint) then
+            local playerPed = GetPlayerPed(source)
+            local waypointCoords = GetBlipInfoIdCoord(waypoint)
+            SetEntityCoords(playerPed, waypointCoords.x, waypointCoords.y, waypointCoords.z, 0, 0, 0, 0)
+            TriggerClientEvent('chat:addMessage', source, { args = { '^1Teleport', '^7You have been teleported to the waypoint.' } })
+        else
+            TriggerClientEvent('chat:addMessage', source, { args = { '^1Teleport', '^7No waypoint found.' } })
+        end
+    else
+        TriggerClientEvent('chat:addMessage', source, { args = { '^1Teleport', '^7Insufficient permission.' } })
+    end
+end, true)
