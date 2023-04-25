@@ -104,3 +104,11 @@ RegisterCommand("forcesalary", function(source, args)
     end
 end, true)
 
+
+RegisterCommand("car", function(source, args, rawCommand)
+    local model = args[1] or "adder" -- Default vehicle model is Adder
+    local playerPed = GetPlayerPed(source)
+    local coords = GetEntityCoords(playerPed)
+    TriggerClientEvent("spawnVehicle", -1, coords, model) -- Spawn the vehicle for all clients
+  end, true) -- Set the last argument to true to make the command restricted to admin players
+  
