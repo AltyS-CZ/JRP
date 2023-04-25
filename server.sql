@@ -18,23 +18,23 @@ CREATE DATABASE IF NOT EXISTS `fivem_economy` /*!40100 DEFAULT CHARACTER SET utf
 USE `fivem_economy`;
 
 -- Dumping structure for table fivem_economy.users
-CREATE TABLE IF NOT EXISTS `users` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `identifier` varchar(255) NOT NULL,
-  `cash` int(11) NOT NULL DEFAULT 0,
-  `bank` int(11) NOT NULL DEFAULT 0,
-  `dirty_money` int(11) NOT NULL DEFAULT 0,
-  `job` varchar(255) DEFAULT NULL,
-  `position` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`position`)),
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `users` (
+	`id` INT(11) NOT NULL AUTO_INCREMENT,
+	`identifier` VARCHAR(255) NOT NULL COLLATE 'utf8mb4_general_ci',
+	`cash` INT(11) NOT NULL DEFAULT '0',
+	`bank` INT(11) NOT NULL DEFAULT '0',
+	`dirty_money` INT(11) NOT NULL DEFAULT '0',
+	`job` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_general_ci',
+	`position` LONGTEXT NULL DEFAULT NULL COLLATE 'utf8mb4_bin',
+	`salary` INT(11) NOT NULL DEFAULT '0',
+	PRIMARY KEY (`id`) USING BTREE,
+	CONSTRAINT `position` CHECK (json_valid(`position`))
+)
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=4
+;
 
--- Dumping data for table fivem_economy.users: ~0 rows (approximately)
-DELETE FROM `users`;
-/*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` (`id`, `identifier`, `cash`, `bank`, `dirty_money`, `job`, `position`) VALUES
-	(1, 'steam:1100001185dd3c8', 0, 0, 0, NULL, NULL);
-/*!40000 ALTER TABLE `users` ENABLE KEYS */;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
