@@ -135,29 +135,3 @@ function HasModelLoadedSuccessfully(model)
 
     return true
 end
-
-
-
-
-local function getPlayerData(player, callback)
-    local playerId = tonumber(player)
-    local identifiers = GetPlayerIdentifiers(playerId)
-    local identifier = identifiers[1]
-    exports.oxmysql:execute('SELECT * FROM users WHERE identifier = ?', {identifier}, function(result)
-        if result[1] ~= nil then
-            local data = {
-                identifier = result[1].identifier,
-                license = result[1].license,
-                name = result[1].name,
-                job = result[1].job or "Citizen",
-                cash = result[1].cash,
-                bank = result[1].bank,
-                dirty_money = result[1].dirty_money,
-                position = json.decode(result[1].position) or nil
-            }
-            callback(data)
-        else
-            callback(nil)
-        end
-    end)
-end
