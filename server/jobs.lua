@@ -40,42 +40,43 @@ end
 
 
 
-
 function SetJob(playerId, job)
     -- Get the player's identifier
     local identifier = GetPlayerIdentifier(playerId, 0)
-  
-    -- Check if the job exists in the jobs table
-    if jobs[job] == nil then
+
+    -- Find the job in the jobs table
+    local jobData = nil
+    for _, v in pairs(jobs) do
+        if v.name == job then
+            jobData = v
+            break
+        end
+    end
+
+    -- Check if the job exists
+    if not jobData then
         TriggerClientEvent('chat:addMessage', playerId, {
             color = {255, 0, 0},
-            multiline = true,
             args = {"Server", "Invalid job name: " .. job}
         })
         return
     end
-    
+
     -- Check if the player has permission to set jobs
     if not IsPlayerAceAllowed(playerId, "custom_economy.setjob") then
         TriggerClientEvent('chat:addMessage', playerId, {
             color = {255, 0, 0},
-            multiline = true,
             args = {"Server", "You do not have permission to use /setjob"}
         })
         return
     end
   
     -- Update the job and salary in the database for the specified player
-    local salary = jobs[job].salary
-    exports.oxmysql:execute('UPDATE users SET job = @job, salary = @salary WHERE identifier = @identifier', {
-        ['@job'] = job,
-        ['@salary'] = salary,
-        ['@identifier'] = identifier
-        }, function(rowsAffected)
+    local salary = jobData.salary
+    exports.oxmysql:execute('UPDATE users SET job = ?, salary = ? WHERE identifier = ?', {job, salary, identifier}, function(rowsAffected)
         if rowsAffected > 0 then
             TriggerClientEvent('chat:addMessage', playerId, {
                 color = {0, 255, 0},
-                multiline = true,
                 args = {"Server", "Set job to " .. job}
             })
             -- Force the player's job to refresh immediately
@@ -83,6 +84,7 @@ function SetJob(playerId, job)
         end
     end)
 end
+
   
 
 -- Register the chat command to set a player's job (admin only)
