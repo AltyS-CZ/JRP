@@ -13,9 +13,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 
--- Dumping database structure for fivem_economy
-CREATE DATABASE IF NOT EXISTS `fivem_economy` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */;
-USE `fivem_economy`;
 
 -- Dumping structure for table fivem_economy.users
 CREATE TABLE `users` (
