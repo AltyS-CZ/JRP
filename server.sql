@@ -32,6 +32,17 @@ ENGINE=InnoDB
 AUTO_INCREMENT=4
 ;
 
+CREATE TABLE `player_inventory` (
+	`identifier` VARCHAR(40) NOT NULL COLLATE 'utf8mb4_general_ci',
+	`item` VARCHAR(50) NOT NULL COLLATE 'utf8mb4_general_ci',
+	`count` INT(11) NOT NULL,
+	PRIMARY KEY (`identifier`, `item`) USING BTREE
+)
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+;
+
+
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
