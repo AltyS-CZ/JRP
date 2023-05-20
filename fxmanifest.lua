@@ -10,14 +10,16 @@ server_scripts {
     'server/config_server.lua',
     'server/main.lua',
     'server/commands.lua',
-    'server/jobs.lua',
-    --'server/cfg_shops.lua', -- Shops not ready yet
-    --'server/sv_shops.lua' -- Shops not ready yet
+    'inv_cfg.lua',
+    'money.lua',
+    'sv_items.lua'
+    --'sv_shops.lua -- COMING SOON
 }
 
 client_scripts {
     'client/main.lua',
-    --'client/cl_shops.lua', -- Shops not ready yet
+    'cl_car',
+    --'client/cl_shops.lua', -- COMING SOON
     'client/cl_commands.lua'
 }
 
