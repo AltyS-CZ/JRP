@@ -148,16 +148,12 @@ function RemovePlayerCash(source, amount)
 
         -- Update the cash in the database
         exports.oxmysql:execute('UPDATE users SET cash = ? WHERE identifier = ?', { newCash, GetPlayerIdentifier(player, 0) })
-
-        
-        
         -- Cash successfully removed
         TriggerClientEvent('chat:addMessage', player, { args = { '^2Success:', '$' .. amount ' was removed from your cash.'} })
-        return true  -- Cash successfully removed
+        return true
     else
-        return false  -- Player does not have enough cash
-        -- Player does not have enough cash
         TriggerClientEvent('chat:addMessage', player, { args = { '^1Error:', 'Insufficient funds' } })
+        return false
     end
 end
 
