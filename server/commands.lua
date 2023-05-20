@@ -1,5 +1,3 @@
--- Commands for Framework
-
 -------------------------
 
 --INFO COMMAND (ALL)
@@ -39,19 +37,24 @@ RegisterCommand("info", function(source, args)
         end
     end)
 end)
+
 -------------------------
 -- COORDS COMMAND (ADMIN)
-
 RegisterCommand("getpos", function(source, args, rawCommand)
-    if IsPlayerAceAllowed(source, "admin") then
-        local playerPed = GetPlayerPed(source)
-        local playerCoords = GetEntityCoords(playerPed)
-        TriggerClientEvent("chat:addMessage", source, {args = {"^1[Server]", "^7Your position: " .. playerCoords.x .. ", " .. playerCoords.y .. ", " .. playerCoords.z}})
-    else
-        TriggerClientEvent("chat:addMessage", source, {args = {"^1[Server]", "^7You do not have permission to use this command."}})
-    end
+    local playerPed = GetPlayerPed(source)
+    local playerCoords = GetEntityCoords(playerPed)
+    TriggerClientEvent("chat:addMessage", source, {args = {"^1[Server]", "^7Your position: " .. playerCoords.x .. ", " .. playerCoords.y .. ", " .. playerCoords.z}})
 end, true)
 
+
+-- Command to spawn a vehicle by model name
+RegisterCommand("car", function(source --[[ this is the player ID (on the server): a number ]], args --[[ this is a table of the arguments provided ]], rawCommand --[[ this is what the user entered ]])
+    if source > 0 then
+        TriggerClientEvent("admin:on_car", source, args)
+    else
+        print("This is console!")
+    end
+end, true)
 
 
 ---------------------------
@@ -59,56 +62,59 @@ end, true)
 -- TPM (ADMIN)
 
 RegisterCommand("tpc", function(source, args, rawCommand)
-    if IsPlayerAceAllowed(source, "admin") then
-        local playerPed = GetPlayerPed(source)
-        local x = tonumber(args[1])
-        local y = tonumber(args[2])
-        local z = tonumber(args[3])
+	local playerPed = GetPlayerPed(source)
+	local x = tonumber(args[1])
+	local y = tonumber(args[2])
+	local z = tonumber(args[3])
         
-        if x ~= nil and y ~= nil and z ~= nil then
-            SetEntityCoords(playerPed, x, y, z)
-            TriggerClientEvent("chat:addMessage", source, {color = {255, 255, 0}, args = {"Server", "Teleported to marker."}})
-        else
-            TriggerClientEvent("chat:addMessage", source, {color = {255, 0, 0}, args = {"Error", "Invalid coordinates."}})
-        end
-    end
+	if x ~= nil and y ~= nil and z ~= nil then
+		SetEntityCoords(playerPed, x, y, z)
+		TriggerClientEvent("chat:addMessage", source, {color = {255, 255, 0}, args = {"Server", "Teleported to marker."}})
+	else
+		TriggerClientEvent("chat:addMessage", source, {color = {255, 0, 0}, args = {"Error", "Invalid coordinates."}})
+	end
 end, true)
 
-RegisterCommand('tpm', function(source, args)
-    if IsPlayerAceAllowed(source, 'admin') then
-        local waypoint = GetFirstBlipInfoId(8)
-        if DoesBlipExist(waypoint) then
-            local playerPed = GetPlayerPed(source)
-            local waypointCoords = GetBlipInfoIdCoord(waypoint)
-            SetEntityCoords(playerPed, waypointCoords.x, waypointCoords.y, waypointCoords.z, 0, 0, 0, 0)
-            TriggerClientEvent('chat:addMessage', source, { args = { '^1Teleport', '^7You have been teleported to the waypoint.' } })
-        else
-            TriggerClientEvent('chat:addMessage', source, { args = { '^1Teleport', '^7No waypoint found.' } })
-        end
-    else
-        TriggerClientEvent('chat:addMessage', source, { args = { '^1Teleport', '^7Insufficient permission.' } })
-    end
-end, true)
-
--------------------------
--- Force Salary Command (ADMIN/DEBUG)
-RegisterCommand("forcesalary", function(source, args)
-    -- check if the player executing the command is an admin
+RegisterCommand("tpm", function(source, args, rawCommand)
     if IsPlayerAceAllowed(source, "admin") then
-        -- give salary to all players
-        GiveSalary()
-        TriggerClientEvent("chat:addMessage", -1, {args = {"^1SERVER", "All players have received their salary."}})
+        local waypointBlip = GetFirstBlipInfoId(8)
+        if waypointBlip ~= nil then
+            local waypointCoords = GetBlipCoords(waypointBlip)
+            -- Teleport the player to the waypoint coordinates
+            if waypointCoords ~= nil then
+                SetEntityCoords(GetPlayerPed(source), waypointCoords.x, waypointCoords.y, waypointCoords.z)
+            end
+        else
+            -- No waypoint found
+            TriggerClientEvent('chat:addMessage', source, {
+                color = {255, 0, 0},
+                multiline = true,
+                args = {"Server", "You haven't set a waypoint."}
+            })
+        end
     else
-        -- inform the player that they do not have permission to execute the command
-        TriggerClientEvent("chat:addMessage", source, {args = {"^1SERVER", "You do not have permission to execute this command."}})
+        -- Player does not have permission to use the command
+        -- You can send a chat message to inform the player
+        TriggerClientEvent('chat:addMessage', source, {
+            color = {255, 0, 0},
+            multiline = true,
+            args = {"Server", "You don't have permission to use this command."}
+        })
     end
-end, true)
+end, false)
 
-
-RegisterCommand("car", function(source, args, rawCommand)
-    local model = args[1] or "adder" -- Default vehicle model is Adder
-    local playerPed = GetPlayerPed(source)
-    local coords = GetEntityCoords(playerPed)
-    TriggerClientEvent("spawnVehicle", -1, coords, model) -- Spawn the vehicle for all clients
-end, true) -- Set the last argument to true to make the command restricted to admin players
-  
+RegisterCommand("dv", function(source, args, rawCommand)
+    -- Check if the player has the 'admin' permission using ACE
+    if IsPlayerAceAllowed(source, "admin") then
+        -- Delete the player's vehicle
+        DeletePlayerVehicle(source)
+    else
+        -- Player does not have permission to use the command
+        -- You can send a chat message to inform the player
+        TriggerClientEvent('chat:addMessage', source, {
+            color = {255, 0, 0},
+            multiline = true,
+            args = {"Server", "You don't have permission to use this command."}
+        })
+    end
+end, false)
