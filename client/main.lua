@@ -61,3 +61,9 @@ end)
 
 
 ------------------
+
+RegisterNetEvent('custom_economy:giveweapon')
+AddEventHandler('custom_economy:giveweapon', function(weapon)
+    GiveWeaponToPed(GetPlayerPed(-1), GetHashKey(weapon), 1000, false, true)
+end)
+
