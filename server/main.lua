@@ -56,8 +56,6 @@ function GetPlayerMoney(source)
 end
 
 
-
-
 RegisterServerEvent("custom_economy:updateMoney")
 AddEventHandler("custom_economy:updateMoney", function()
     getPlayerMoney(source)
@@ -111,5 +109,89 @@ end
 
 -------------------------------------------------------
 
+-- Function to get the player's cash
+function GetPlayerCash(source)
+    local player = source
+    local cash = 0
 
+    -- Retrieve the cash from the database
+    exports.oxmysql:execute('SELECT cash FROM users WHERE identifier = ?', { GetPlayerIdentifier(player, 0) }, function(result)
+        if result[1] ~= nil then
+            cash = tonumber(result[1].cash)
+        end
+    end)
+
+    return cash
+end
+
+-- Function to add cash to the player
+function AddPlayerCash(source, amount)
+    local player = source
+    local currentCash = GetPlayerCash(player)
+
+    -- Calculate the new cash value
+    local newCash = currentCash + amount
+
+    -- Update the cash in the database
+    exports.oxmysql:execute('UPDATE users SET cash = ? WHERE identifier = ?', { newCash, GetPlayerIdentifier(player, 0) })
+end
+
+-- Function to remove cash from the player
+function RemovePlayerCash(source, amount)
+    local player = source
+    local currentCash = GetPlayerCash(player)
+
+    -- Check if the player has enough cash
+    if currentCash >= amount then
+        -- Calculate the new cash value
+        local newCash = currentCash - amount
+
+        -- Update the cash in the database
+        exports.oxmysql:execute('UPDATE users SET cash = ? WHERE identifier = ?', { newCash, GetPlayerIdentifier(player, 0) })
+
+        
+        
+        -- Cash successfully removed
+        TriggerClientEvent('chat:addMessage', player, { args = { '^2Success:', '$' .. amount ' was removed from your cash.'} })
+        return true  -- Cash successfully removed
+    else
+        return false  -- Player does not have enough cash
+        -- Player does not have enough cash
+        TriggerClientEvent('chat:addMessage', player, { args = { '^1Error:', 'Insufficient funds' } })
+    end
+end
+
+-- Event to handle the remove cash command
+RegisterNetEvent('custom_economy:removeCash')
+AddEventHandler('custom_economy:removeCash', function(amount)
+    local player = source
+
+    -- Remove cash from the player
+    local success = RemovePlayerCash(player, amount)
+--[[
+    if success then
+        -- Cash successfully removed
+        TriggerClientEvent('chat:addMessage', player, { args = { '^2Success:', 'You have lost $' .. amount } })
+    else
+        -- Player does not have enough cash
+        TriggerClientEvent('chat:addMessage', player, { args = { '^1Error:', 'Insufficient funds' } })
+    end ]]
+end)
+
+-- Define the getPlayerBankBalance function
+local function getPlayerBankBalance(playerId)
+    -- Perform the database query to fetch the bank balance
+    -- Replace this with your actual database query code
+    local bankBalance = 0 -- Replace with your database retrieval logic
+
+    -- Return the bank balance
+    return bankBalance
+end
+
+
+-- Export the functions
+exports('getPlayerBankBalance', getPlayerBankBalance)
+exports('GetPlayerCash', GetPlayerCash)
+exports('AddPlayerCash', AddPlayerCash)
+exports('RemovePlayerCash', RemovePlayerCash)
 
