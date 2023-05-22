@@ -1,44 +1,3 @@
-function RemoveCash(amount)
-    local src = source
-    local identifier = GetPlayerIdentifier(src, 0)
-  
-    -- Retrieve current cash value from the database
-    exports.oxmysql:execute('SELECT cash FROM users WHERE identifier = ?', {identifier}, function(result)
-        if result[1] then
-            local currentCash = result[1].cash
-
-            -- Check if the player has enough cash
-            if currentCash >= amount then
-                -- Perform the cash deduction
-                local newCash = currentCash - amount
-
-                -- Update the cash value in the database
-                exports.oxmysql:execute('UPDATE users SET cash = ? WHERE identifier = ?', {newCash, identifier})
-
-                -- Trigger a client event to notify the player
-                TriggerClientEvent('chat:addMessage', src, {
-                    color = {255, 0, 0},
-                    args = {'Server', 'You lost $' .. amount .. ' from your cash.'}
-                })
-            else
-                TriggerClientEvent('chat:addMessage', src, {
-                    color = {255, 0, 0},
-                    args = {'Server', 'Insufficient funds!'}
-                })
-            end
-        end
-    end)
-end
-
-
-RegisterServerEvent('custom_economy:removeCash')
-AddEventHandler('custom_economy:removeCash', function(amount)
-    RemoveCash(amount)
-end)
-
-----------------
-
-
 -- Example function to initialize the inventory database
 function InitializeInventoryDatabase()
     exports.oxmysql:execute('CREATE TABLE IF NOT EXISTS player_inventory (identifier VARCHAR(40) NOT NULL, item VARCHAR(50), count INT, PRIMARY KEY (identifier, item))')
@@ -102,37 +61,11 @@ function SavePlayerInventory(identifier)
     end
 end
 
-function LoadPlayerInventory(identifier, callback)
-    exports.oxmysql:fetch('SELECT * FROM player_inventory WHERE identifier = ?', {identifier}, function(result)
-        if result then
-            local inventory = {}
-            for i = 1, #result do
-                inventory[result[i].item] = result[i].count
-            end
-            callback(inventory)
-        else
-            callback({})
-        end
-    end)
-end
 
 
 
--- ... other code ...
---[[
-RegisterCommand('inv', function(source, args, rawCommand)
-    -- Display the player's inventory when the /inv command is used
-    DisplayPlayerInventory(source)
-end, false) -- false means this command can be used by any player, not just admins
 
-RegisterCommand('inv', function(source, args, rawCommand)
-    local player = source
-    local identifier = GetPlayerIdentifier(source)
-    local inventory = LoadPlayerInventory(identifier)
-	TriggerClientEvent('displayInventory', player, inventory)
 
-end, false)
---]]
 
 RegisterNetEvent('AddInvItem')
 AddEventHandler('AddInvItem', function(identifier, item, count)
@@ -153,14 +86,92 @@ function SendInventoryMenu(playerId, inventory)
 end
 
 -- Command to open the inventory menu
-RegisterCommand('inv', function(source, args, rawCommand)
-    local identifier = GetPlayerIdentifier(source, 0)
-    
-    -- Load the player's inventory
-    LoadPlayerInventory(identifier, function(inventory)
-        -- Trigger the client-side event to open the menu and pass the inventory data
-        TriggerClientEvent('inventory:openMenu', source, inventory)
+RegisterCommand('inv', function(source, args)
+    local playerId = source
+    local playerIdentifier = GetPlayerIdentifier(playerId)
+
+    -- Fetch the player's inventory from the database
+    exports.oxmysql:fetch('SELECT * FROM player_inventory WHERE identifier = ?', { playerIdentifier }, function(result)
+        if result then
+            local inventory = {}
+            for _, row in ipairs(result) do
+                inventory[row.item] = row.count
+            end
+
+            -- Trigger the client event to open the inventory menu and display the items
+            TriggerClientEvent('inventory:openMenu', playerId, inventory)
+        else
+            TriggerClientEvent('chat:addMessage', playerId, { args = { 'Error', 'Failed to retrieve inventory.' } })
+        end
     end)
-end, false)
+end)
+
+
+
+
+function GiveItem(source, item)
+    local player = source
+    exports.oxmysql:insert('INSERT INTO player_inventory (identifier, item_name, item_count) VALUES (?, ?, ?)', {
+        GetPlayerIdentifier(player, 0),
+        item,
+        1
+    })
+    TriggerClientEvent('chat:addMessage', player, {
+        args = {'Server', 'You received a ' .. item}
+    })
+end
+
+function GivePlayerItem(playerId, item, count)
+    local identifier = GetPlayerIdentifier(playerId)
+
+    -- Check if the item already exists in the player's inventory
+    exports.oxmysql:scalar('SELECT COUNT(*) FROM player_inventory WHERE identifier = ? AND item = ?',
+        { identifier, item },
+        function(existingCount)
+            if existingCount > 0 then
+                -- Item already exists, update the count
+                exports.oxmysql:execute('UPDATE player_inventory SET count = count + ? WHERE identifier = ? AND item = ?',
+                    { count, identifier, item },
+                    function(affectedRows)
+                        if affectedRows > 0 then
+                            print("Item count has been updated in the player's inventory.")
+                        else
+                            print("Failed to update item count in the player's inventory.")
+                        end
+                    end
+                )
+            else
+                -- Item doesn't exist, insert a new row
+                exports.oxmysql:execute('INSERT INTO player_inventory (identifier, item, count) VALUES (?, ?, ?)',
+                    { identifier, item, count },
+                    function(affectedRows)
+                        if affectedRows > 0 then
+                            print("Item has been added to the player's inventory.")
+                        else
+                            print("Failed to add item to the player's inventory.")
+                        end
+                    end
+                )
+            end
+        end
+    )
+end
+
+
+
+
+
+RegisterCommand('giveitem', function(source, args)
+    local playerId = tonumber(args[1])
+    local item = args[2]
+    local count = tonumber(args[3])
+
+    if playerId and item and count then
+        GivePlayerItem(playerId, item, count)
+        TriggerClientEvent('chat:addMessage', -1, { args = { '^2Success:', 'Item has been given to player ' .. playerId .. '.' } })
+    else
+        TriggerClientEvent('chat:addMessage', -1, { args = { '^1Error:', 'Invalid command usage. Correct usage: /giveitem [playerId] [item] [count]' } })
+    end
+end)
 
 
