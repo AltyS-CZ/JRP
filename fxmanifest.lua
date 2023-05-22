@@ -16,6 +16,7 @@ server_scripts {
 }
 
 client_scripts {
+    '@menuv/menuv.lua',
     'client/main.lua',
     'client/cmds/cl_car',
     'client/cl_commands.lua',
