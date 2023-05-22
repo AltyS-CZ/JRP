@@ -40,13 +40,13 @@ AddEventHandler('playerDropped', function(reason)
 end)
 
 -- Event handler for when a player is connecting
-RegisterServerEvent('playerConnecting')
+--[[RegisterServerEvent('playerConnecting')
 AddEventHandler('playerConnecting', function()
     local identifier = GetPlayerIdentifiers(source)[1]
 
     -- Load player's inventory from the database here
     LoadPlayerInventory(identifier)
-end)
+end)]]
 
 -- Assuming you have a table storing player's inventory in memory
 local player_inventories = {}
