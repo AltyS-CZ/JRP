@@ -133,7 +133,7 @@ function GivePlayerItem(playerId, item, count)
                 exports.oxmysql:execute('UPDATE player_inventory SET count = count + ? WHERE identifier = ? AND item = ?',
                     { count, identifier, item },
                     function(affectedRows)
-                        if affectedRows > 0 then
+                        if affectedRows and affectedRows.affectedRows > 0 then -- Access affectedRows inside the table
                             print("Item count has been updated in the player's inventory.")
                         else
                             print("Failed to update item count in the player's inventory.")
@@ -145,7 +145,7 @@ function GivePlayerItem(playerId, item, count)
                 exports.oxmysql:execute('INSERT INTO player_inventory (identifier, item, count) VALUES (?, ?, ?)',
                     { identifier, item, count },
                     function(affectedRows)
-                        if affectedRows > 0 then
+                        if affectedRows and affectedRows.affectedRows > 0 then -- Access affectedRows inside the table
                             print("Item has been added to the player's inventory.")
                         else
                             print("Failed to add item to the player's inventory.")
@@ -162,15 +162,34 @@ end
 
 
 RegisterCommand('giveitem', function(source, args)
-    local playerId = tonumber(args[1])
-    local item = args[2]
-    local count = tonumber(args[3])
+    local playerId = source
+    local identifier = nil
 
-    if playerId and item and count then
-        GivePlayerItem(playerId, item, count)
-        TriggerClientEvent('chat:addMessage', -1, { args = { '^2Success:', 'Item has been given to player ' .. playerId .. '.' } })
+    -- Get the player's identifier from their server ID
+    for _, player in ipairs(GetPlayers()) do
+        if tonumber(player) == playerId then
+            identifier = GetPlayerIdentifier(player)
+            break
+        end
+    end
+
+    -- Check if the player's identifier is valid
+    if identifier then
+        local item = args[2]
+        local count = tonumber(args[3])
+
+        -- Check if the item and count are provided
+        if item and count then
+            -- Call the GivePlayerItem function with the player's identifier
+            GivePlayerItem(playerId, item, count)
+        else
+            print("Invalid command usage. Correct usage: /giveitem <item> <count>")
+        end
     else
-        TriggerClientEvent('chat:addMessage', -1, { args = { '^1Error:', 'Invalid command usage. Correct usage: /giveitem [playerId] [item] [count]' } })
+        print("Failed to retrieve player identifier.")
     end
 end)
+
+
+
 
