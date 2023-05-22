@@ -120,84 +120,46 @@ RegisterCommand("dv", function(source, args, rawCommand)
 end, false)
 
 -----------------
-
--- Command to give money to a player
-RegisterCommand("givemoney", function(source, args, rawCommand)
-    -- Check if the player has the 'admin' permission using ACE
-    if IsPlayerAceAllowed(source, "admin") then
-        -- Get the player's identifier
-        local identifier = GetPlayerIdentifier(source, 0)
-
-        -- Check if a valid player ID and money account were provided
-        if args[1] and args[2] and (args[2] == "cash" or args[2] == "bank") then
-            local player = tonumber(args[1])
-            local account = args[2]
-            local amount = tonumber(args[3])
-
-            -- Give money to the player's account
-            exports.custom_economy:addMoney(player, account, amount)
-
-            -- Notify the player about the money given
-            TriggerClientEvent('chat:addMessage', source, {
-                color = {0, 255, 0},
-                multiline = true,
-                args = {"Server", "Gave $" .. amount .. " to player " .. player .. "'s " .. account .. " account."}
-            })
-        else
-            -- Invalid arguments provided
-            TriggerClientEvent('chat:addMessage', source, {
-                color = {255, 0, 0},
-                multiline = true,
-                args = {"Server", "Invalid command usage. /givemoney [playerID] [cash/bank] [amount]"}
-            })
-        end
-    else
-        -- Player does not have permission to use the command
-        TriggerClientEvent('chat:addMessage', source, {
-            color = {255, 0, 0},
-            multiline = true,
-            args = {"Server", "You don't have permission to use this command."}
-        })
-    end
-end, false)
-
--- Command to remove money from a player
+-- /removemoney command
 RegisterCommand("removemoney", function(source, args, rawCommand)
-    -- Check if the player has the 'admin' permission using ACE
-    if IsPlayerAceAllowed(source, "admin") then
-        -- Get the player's identifier
-        local identifier = GetPlayerIdentifier(source, 0)
+    local player = source
+    local targetPlayer = tonumber(args[1])
+    local accountType = args[2] -- "cash" or "bank"
+    local amount = tonumber(args[3])
 
-        -- Check if a valid player ID and money account were provided
-        if args[1] and args[2] and (args[2] == "cash" or args[2] == "bank") then
-            local player = tonumber(args[1])
-            local account = args[2]
-            local amount = tonumber(args[3])
-
-            -- Remove money from the player's account
-            exports.custom_economy:removeMoney(player, account, amount)
-
-            -- Notify the player about the money removed
-            TriggerClientEvent('chat:addMessage', source, {
-                color = {0, 255, 0},
-                multiline = true,
-                args = {"Server", "Removed $" .. amount .. " from player " .. player .. "'s " .. account .. " account."}
-            })
-        else
-            -- Invalid arguments provided
-            TriggerClientEvent('chat:addMessage', source, {
-                color = {255, 0, 0},
-                multiline = true,
-                args = {"Server", "Invalid command usage. /removemoney [playerID] [cash/bank] [amount]"}
-            })
-        end
-    else
-        -- Player does not have permission to use the command
-        TriggerClientEvent('chat:addMessage', source, {
+    -- Check if the player is an admin
+    if not IsAdmin(GetPlayerIdentifier(player, 0)) then
+        -- Player is not an admin, show error message
+        TriggerClientEvent('chat:addMessage', player, {
             color = {255, 0, 0},
             multiline = true,
             args = {"Server", "You don't have permission to use this command."}
         })
+        return
     end
+
+    -- Remove money from the targetPlayer
+    TriggerEvent("custom_economy:removeMoney", targetPlayer, accountType, amount)
 end, false)
 
+-- /givemoney command
+RegisterCommand("givemoney", function(source, args, rawCommand)
+    local player = source
+    local targetPlayer = tonumber(args[1])
+    local accountType = args[2] -- "cash" or "bank"
+    local amount = tonumber(args[3])
+
+    -- Check if the player is an admin
+    if not IsAdmin(GetPlayerIdentifier(player, 0)) then
+        -- Player is not an admin, show error message
+        TriggerClientEvent('chat:addMessage', player, {
+            color = {255, 0, 0},
+            multiline = true,
+            args = {"Server", "You don't have permission to use this command."}
+        })
+        return
+    end
+
+    -- Give money to the targetPlayer
+    TriggerEvent("custom_economy:addMoney", targetPlayer, accountType, amount)
+end, false)
