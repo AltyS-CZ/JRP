@@ -120,46 +120,45 @@ RegisterCommand("dv", function(source, args, rawCommand)
 end, false)
 
 -----------------
--- /removemoney command
-RegisterCommand("removemoney", function(source, args, rawCommand)
-    local player = source
-    local targetPlayer = tonumber(args[1])
-    local accountType = args[2] -- "cash" or "bank"
-    local amount = tonumber(args[3])
+-- Server-side
 
-    -- Check if the player is an admin
-    if not IsAdmin(GetPlayerIdentifier(player, 0)) then
-        -- Player is not an admin, show error message
-        TriggerClientEvent('chat:addMessage', player, {
-            color = {255, 0, 0},
-            multiline = true,
-            args = {"Server", "You don't have permission to use this command."}
-        })
-        return
-    end
-
-    -- Remove money from the targetPlayer
-    TriggerEvent("custom_economy:removeMoney", targetPlayer, accountType, amount)
-end, false)
-
--- /givemoney command
+-- Command to give money to a player
 RegisterCommand("givemoney", function(source, args, rawCommand)
-    local player = source
+    local playerId = source
     local targetPlayer = tonumber(args[1])
-    local accountType = args[2] -- "cash" or "bank"
-    local amount = tonumber(args[3])
+    local amount = tonumber(args[2])
 
-    -- Check if the player is an admin
-    if not IsAdmin(GetPlayerIdentifier(player, 0)) then
-        -- Player is not an admin, show error message
-        TriggerClientEvent('chat:addMessage', player, {
-            color = {255, 0, 0},
-            multiline = true,
-            args = {"Server", "You don't have permission to use this command."}
+    if targetPlayer and amount then
+        exports.custom_economy:AddPlayerCash(targetPlayer, amount) -- Use the appropriate export to add cash to the target player
+        TriggerClientEvent("chat:addMessage", playerId, {
+            color = {0, 255, 0},
+            args = {"Server", "Successfully gave $" .. amount .. " to player " .. targetPlayer}
         })
-        return
+    else
+        TriggerClientEvent("chat:addMessage", playerId, {
+            color = {255, 0, 0},
+            args = {"Server", "Invalid arguments. Usage: /givemoney [playerId] [amount]"}
+        })
     end
+end, true)
 
-    -- Give money to the targetPlayer
-    TriggerEvent("custom_economy:addMoney", targetPlayer, accountType, amount)
-end, false)
+-- Command to remove money from a player
+RegisterCommand("removemoney", function(source, args, rawCommand)
+    local playerId = source
+    local targetPlayer = tonumber(args[1])
+    local amount = tonumber(args[2])
+
+    if targetPlayer and amount then
+        exports.custom_economy:RemovePlayerCash(targetPlayer, amount) -- Use the appropriate export to remove cash from the target player
+        TriggerClientEvent("chat:addMessage", playerId, {
+            color = {0, 255, 0},
+            args = {"Server", "Successfully removed $" .. amount .. " from player " .. targetPlayer}
+        })
+    else
+        TriggerClientEvent("chat:addMessage", playerId, {
+            color = {255, 0, 0},
+            args = {"Server", "Invalid arguments. Usage: /removemoney [playerId] [amount]"}
+        })
+    end
+end, true)
+
