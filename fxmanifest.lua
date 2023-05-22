@@ -10,7 +10,7 @@ server_scripts {
     'server/config_server.lua',
     'server/main.lua',
     'server/commands.lua',
-    'jrp_inv/inv_cfg.lua',
+    'jrp_inv/config.lua',
     'jrp_inv/items.lua',
     'jrp_inv/server.lua'
 }
