@@ -10,16 +10,19 @@ server_scripts {
     'server/config_server.lua',
     'server/main.lua',
     'server/commands.lua',
-    'inv_cfg.lua',
-    'money.lua',
-    'sv_items.lua'
-    --'sv_shops.lua -- COMING SOON
+    'jrp_inv/inv_cfg.lua',
+    'jrp_inv/items.lua',
+    'jrp_inv/server.lua'
 }
 
 client_scripts {
     'client/main.lua',
-    'cl_car',
-    --'client/cl_shops.lua', -- COMING SOON
-    'client/cl_commands.lua'
+    'client/cmds/cl_car',
+    'client/cl_commands.lua',
+    'jrp_inv/inventory.lua'
+}
+
+dependencies {
+    'menuv',
 }
 
