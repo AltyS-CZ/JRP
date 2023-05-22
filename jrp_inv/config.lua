@@ -2,11 +2,12 @@
 Config = {}
 
 Config.item_list = {
-    { item = "Apple", name = "Apple" },
-    { item = "Bread", name = "Bread" },
-    { item = "Water", name = "Water" },
-    { item = "Bandage", name = "Bandage" },
-    { item = "Soda", name = "Soda" }
+    { item = "Apple", name = "apple" },
+    { item = "Bread", name = "bread" },
+    { item = "Water", name = "water" },
+    { item = "Bandage", name = "bandage" },
+    { item = "Soda", name = "soda" }
+    -- Additional items follow format to work
 }
 
 
