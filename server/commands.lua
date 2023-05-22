@@ -119,9 +119,15 @@ RegisterCommand("dv", function(source, args, rawCommand)
     end
 end, false)
 
------------------
--- Server-side
 
+
+------
+-- Admin Identifiers or Usernames
+local admins = {
+    "admin1",
+    "admin2",
+    -- Add more admin identifiers or usernames here
+}
 -- Command to give money to a player
 RegisterCommand("givemoney", function(source, args, rawCommand)
     local playerId = source
