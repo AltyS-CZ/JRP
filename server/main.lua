@@ -191,3 +191,14 @@ exports('GetPlayerCash', GetPlayerCash)
 exports('AddPlayerCash', AddPlayerCash)
 exports('RemovePlayerCash', RemovePlayerCash)
 
+
+function IsAdmin(identifier)
+    for _, admin in ipairs(admins) do
+        if identifier == admin then
+            return true
+        end
+    end
+    return false
+end
+
+
