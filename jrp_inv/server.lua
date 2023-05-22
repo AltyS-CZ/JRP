@@ -107,20 +107,6 @@ RegisterCommand('inv', function(source, args)
 end)
 
 
-
-
-function GiveItem(source, item)
-    local player = source
-    exports.oxmysql:insert('INSERT INTO player_inventory (identifier, item_name, item_count) VALUES (?, ?, ?)', {
-        GetPlayerIdentifier(player, 0),
-        item,
-        1
-    })
-    TriggerClientEvent('chat:addMessage', player, {
-        args = {'Server', 'You received a ' .. item}
-    })
-end
-
 function GivePlayerItem(playerId, item, count)
     local identifier = GetPlayerIdentifier(playerId)
 
@@ -134,9 +120,9 @@ function GivePlayerItem(playerId, item, count)
                     { count, identifier, item },
                     function(affectedRows)
                         if affectedRows and affectedRows.affectedRows > 0 then -- Access affectedRows inside the table
-                            print("Item count has been updated in the player's inventory.")
+                            --print("Item count has been updated in the player's inventory.")
                         else
-                            print("Failed to update item count in the player's inventory.")
+                            --print("Failed to update item count in the player's inventory.")
                         end
                     end
                 )
@@ -146,9 +132,9 @@ function GivePlayerItem(playerId, item, count)
                     { identifier, item, count },
                     function(affectedRows)
                         if affectedRows and affectedRows.affectedRows > 0 then -- Access affectedRows inside the table
-                            print("Item has been added to the player's inventory.")
+                            --print("Item has been added to the player's inventory.")
                         else
-                            print("Failed to add item to the player's inventory.")
+                            --print("Failed to add item to the player's inventory.")
                         end
                     end
                 )
@@ -183,10 +169,14 @@ RegisterCommand('giveitem', function(source, args)
             -- Call the GivePlayerItem function with the player's identifier
             GivePlayerItem(playerId, item, count)
         else
-            print("Invalid command usage. Correct usage: /giveitem <item> <count>")
+            --print("Invalid command usage. Correct usage: /giveitem <item> <count>")
+			TriggerClientEvent('chat:addMessage', source, {args = {"^1Error: Wrong usage! Correct usage: /giveitem [id] [item name] [amonut]"}})
         end
     else
-        print("Failed to retrieve player identifier.")
+        --print("Failed to retrieve player identifier.")
+	    TriggerClientEvent('chat:addMessage', source, {args = {"^1Error: ^7Couldn't get player's inventory"}})
+
+
     end
 end)
 
