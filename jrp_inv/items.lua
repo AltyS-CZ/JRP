@@ -1,5 +1,3 @@
-# 
-
 -- main script
 local Config = require('config')
 
@@ -17,16 +15,17 @@ end
 function LoadPlayerInventory(identifier, callback)
     exports.oxmysql:fetch('SELECT * FROM player_inventory WHERE identifier = ?', {identifier}, function(result)
         if result and #result > 0 then
-            local inventory = {}
+            local playerInventory = {} -- Rename the local variable
             for _, row in ipairs(result) do
-                inventory[row.item] = row.count
+                playerInventory[row.item] = row.count
             end
-            callback(inventory)
+            callback(playerInventory)
         else
             callback({})
         end
     end)
 end
+
 RegisterServerEvent('useItem')
 AddEventHandler('useItem', function(item)
     local _source = source
@@ -82,3 +81,4 @@ function table.contains(table, element)
     end
     return false
 end
+
