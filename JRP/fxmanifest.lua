@@ -8,7 +8,8 @@ version '0.0.5'
 server_scripts {
     '@mysql-async/lib/MySQL.lua',
     'server/main.lua',
-    'server/money.lua',
+    'server/events/sv_events.lua',
+    'server/functions/sv_functions.lua'
 }
 
 client_scripts {
