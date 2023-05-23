@@ -1,10 +1,11 @@
 Config = {}
 
 Config.admins = {
-    "steam:1100001185dd3c8"
+    "steam:12345678890", -- exmaple steamid
 }
 
 Config.moderators = {
+    "steam:1234567890", -- example steamid
 }
 
 return Config
