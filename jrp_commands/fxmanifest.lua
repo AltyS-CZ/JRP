@@ -24,4 +24,6 @@ client_scripts {
     'sv_car.lua',
 }
 
+dependency 'JRP'
+
 
