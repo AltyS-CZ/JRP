@@ -19,5 +19,6 @@ server_scripts {
 }
 
 dependencies {
-    'menuv'
+    'menuv',
+    'JRP',
 }
