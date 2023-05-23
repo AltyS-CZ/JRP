@@ -80,12 +80,6 @@ local function getPlayerBankBalance(playerId)
 end
 
 
--- Export the functions
-exports('getPlayerBankBalance', getPlayerBankBalance)
-exports('GetPlayerCash', GetPlayerCash)
-exports('AddPlayerCash', AddPlayerCash)
-exports('RemovePlayerCash', RemovePlayerCash)
-
 --- Get player date such as cash, bank and dirty money
 local function getPlayerData(player, callback)
     local playerId = tonumber(player)
@@ -123,46 +117,89 @@ RegisterCommand("info", function(source, args)
     end)
 end)
 
+function SavePlayerData(identifier, playerId, playerData)
+    exports.oxmysql:execute('UPDATE players SET cash = @cash, bank = @bank WHERE identifier = @identifier AND player_id = @playerId',
+        {
+            ['@identifier'] = identifier,
+            ['@playerId'] = playerId,
+            ['@cash'] = playerData.cash,
+            ['@bank'] = playerData.bank
+        }
+    )
+end
 
-------------------------------------SERVER EVENTS---------------------------------------
 
-RegisterServerEvent("jrp:updateMoney")
-AddEventHandler("jrp:updateMoney", function()
-    getPlayerMoney(source)
-end)
+function SetPlayerCash(identifier, playerId, amount, account)
+    -- Retrieve the player's current cash and bank data based on the identifier and player ID
+    local playerData = GetPlayerData(identifier, playerId)
 
-
-
--- Event to handle giving money to a player
-RegisterServerEvent("jrp:giveMoney")
-AddEventHandler("jrp:giveMoney", function(amount, account)
-    local source = tonumber(source)
-    local identifier = GetPlayerIdentifier(source, 0)
-    local moneyData = getPlayerMoney(identifier)
-
+    -- Update the cash or bank based on the provided account
     if account == "cash" then
-        moneyData.cash = moneyData.cash + amount
+        playerData.cash = playerData.cash + amount
     elseif account == "bank" then
-        moneyData.bank = moneyData.bank + amount
-    elseif account == "dirty" then
-        moneyData.dirtyMoney = moneyData.dirtyMoney + amount
+        playerData.bank = playerData.bank + amount
     end
 
-    updatePlayerMoney(identifier, moneyData)
-    updateMoneyDisplay(source)
+    -- Save the updated player data
+    SavePlayerData(identifier, playerId, playerData)
+end
+------------------------------------SERVER EVENTS---------------------------------------
+
+
+RegisterServerEvent("jrp:giveMoney")
+AddEventHandler("jrp:giveMoney", function(targetId, amount, account)
+    local source = tonumber(source)
+    local identifier = GetPlayerIdentifier(source, 0)
+
+    -- Call the function to set the player's money data
+    SetPlayerCash(identifier, targetId, amount, account)
 end)
 
+RegisterCommand("givemoney", function(source, args)
+    local targetId = tonumber(args[1])
+    local amount = tonumber(args[2])
+    local account = args[3]
 
--- Event to handle the remove cash command
-RegisterNetEvent('jrp:removeCash')
-AddEventHandler('jrp:removeCash', function(amount)
-    local player = source
+    if targetId ~= nil and amount ~= nil and account ~= nil then
+        TriggerEvent("jrp:giveMoney", targetId, amount, account)
+        TriggerClientEvent("chatMessage", source, "^2SUCCESS", {255, 255, 255}, "You have given $" .. amount .. " to player ID " .. targetId .. "'s " .. account)
+    else
+        TriggerClientEvent("chatMessage", source, "^1ERROR", {255, 255, 255}, "Invalid usage! Correct usage: /givemoney [targetID] [amount] [account]")
+    end
+end)
 
-    -- Remove cash from the player
-    local success = RemovePlayerCash(source, amount)
-    if success then
-		return true
-	else
-		return false
-	end
+RegisterServerEvent("jrp:removeMoney")
+AddEventHandler("jrp:removeMoney", function(targetId, amount, account)
+    local source = tonumber(source)
+    local identifier = GetPlayerIdentifier(source, 0)
+    local moneyData = GetPlayerCash(targetId)
+
+    if account == "cash" then
+        if moneyData.cash >= amount then
+            moneyData.cash = moneyData.cash - amount
+        else
+            -- Not enough cash
+            return
+        end
+    elseif account == "bank" then
+        if moneyData.bank >= amount then
+            moneyData.bank = moneyData.bank - amount
+        else
+            -- Not enough money in the bank
+            return
+        end
+    end
+end)
+
+RegisterCommand("removemoney", function(source, args)
+    local targetId = tonumber(args[1])
+    local amount = tonumber(args[2])
+    local account = args[3]
+
+    if targetId ~= nil and amount ~= nil and account ~= nil then
+        TriggerEvent("jrp:removeMoney", targetId, amount, account)
+        TriggerClientEvent("chatMessage", source, "^2SUCCESS", {255, 255, 255}, "You have removed $" .. amount .. " from player ID " .. targetId .. "'s " .. account)
+    else
+        TriggerClientEvent("chatMessage", source, "^1ERROR", {255, 255, 255}, "Invalid usage! Correct usage: /removemoney [targetID] [amount] [account]")
+    end
 end)
