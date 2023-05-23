@@ -2,7 +2,7 @@ fx_version 'cerulean'
 game 'gta5'
 
 author 'JaxDanger'
-description 'Custom Economy Framework'
+description 'Commands for jrp framework'
 version '0.0.5'
 lua54 'yes'
 
@@ -13,16 +13,15 @@ shared_scripts {
 
 
 server_scripts {
+    'sv_car.lua',
     'sv_tpm.lua',
     'sv_getpos.lua',
-    'sv_functions.lua'
+    'sv_functions.lua',
 }
 
 client_scripts {
     'cl_tpm.lua',
+    'sv_car.lua',
 }
 
-dependencies {
-    'JRP'
-}
 
