@@ -8,8 +8,7 @@ version '0.0.5'
 server_scripts {
     '@mysql-async/lib/MySQL.lua',
     'server/main.lua',
-    'server/events/sv_events.lua',
-    'server/functions/sv_functions.lua'
+    'server/server.lua',
 }
 
 client_scripts {
@@ -18,5 +17,17 @@ client_scripts {
 
 dependencies {
     'menuv',
+    'oxmysql',
+    'ox_lib',
 }
+
+exports {
+    'getPlayerBankBalance',
+    'GetPlayerCash',
+    'AddPlayerCash',
+    'RemovePlayerCash',
+}
+
+
+
 
