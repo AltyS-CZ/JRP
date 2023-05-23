@@ -1,23 +1,4 @@
-local cash = 0
-local bank = 0
-local dirtyMoney = 0
-
-function GetPlayerMoney(source)
-    local player = GetPlayerIdentifier(source)
-    local result = nil
-
-    exports.oxmysql:execute('SELECT cash, bank, dirty_money FROM users WHERE identifier = ?', {player}, function(data)
-        result = data[1]
-    end)
-
-    while result == nil do
-        Citizen.Wait(0)
-    end
-
-    return result.cash, result.bank, result.dirty_money
-end
-
-
+---- List of all events
 RegisterServerEvent("jrp:updateMoney")
 AddEventHandler("jrp:updateMoney", function()
     getPlayerMoney(source)
