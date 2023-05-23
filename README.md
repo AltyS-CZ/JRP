@@ -7,7 +7,7 @@ This framework is built from scratch. Although it is not finished, I will accept
 ## INSTALLATION
 
 Look at wiki for installation help
-https://github.com/AltyS-CZ/Jax-s-Custom-Framework/wiki
+https://github.com/Jax-Danger/JRP/wiki
 
 SUPPORT IS AVAILABLE IN MY DISCORD SERVER.
 https://discord.gg/D2t9jdC2wV
