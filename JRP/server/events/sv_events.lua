@@ -1,8 +1,9 @@
----- List of all events
 RegisterServerEvent("jrp:updateMoney")
 AddEventHandler("jrp:updateMoney", function()
     getPlayerMoney(source)
 end)
+
+
 
 -- Event to handle giving money to a player
 RegisterServerEvent("jrp:giveMoney")
@@ -22,9 +23,6 @@ AddEventHandler("jrp:giveMoney", function(amount, account)
     updatePlayerMoney(identifier, moneyData)
     updateMoneyDisplay(source)
 end)
-
-
--------------------------------------------------------
 
 
 -- Event to handle the remove cash command
