@@ -56,8 +56,8 @@ function GetPlayerMoney(source)
 end
 
 
-RegisterServerEvent("custom_economy:updateMoney")
-AddEventHandler("custom_economy:updateMoney", function()
+RegisterServerEvent("jrp:updateMoney")
+AddEventHandler("jrp:updateMoney", function()
     getPlayerMoney(source)
 end)
 
@@ -76,16 +76,11 @@ function getPlayerId(player)
     return nil
 end
 
--- Function to update the player's money display
-function updateMoneyDisplay(source)
-    local identifier = GetPlayerIdentifier(source, 0)
-    local moneyData = getPlayerMoney(identifier)
-    TriggerClientEvent("custom_economy:updateMoneyDisplay", source, moneyData)
-end
+
 
 -- Event to handle giving money to a player
-RegisterServerEvent("custom_economy:giveMoney")
-AddEventHandler("custom_economy:giveMoney", function(amount, account)
+RegisterServerEvent("jrp:giveMoney")
+AddEventHandler("jrp:giveMoney", function(amount, account)
     local source = tonumber(source)
     local identifier = GetPlayerIdentifier(source, 0)
     local moneyData = getPlayerMoney(identifier)
@@ -158,20 +153,17 @@ function RemovePlayerCash(source, amount)
 end
 
 -- Event to handle the remove cash command
-RegisterNetEvent('custom_economy:removeCash')
-AddEventHandler('custom_economy:removeCash', function(amount)
+RegisterNetEvent('jrp:removeCash')
+AddEventHandler('jrp:removeCash', function(amount)
     local player = source
 
     -- Remove cash from the player
-    local success = RemovePlayerCash(player, amount)
---[[
+    local success = RemovePlayerCash(source, amount)
     if success then
-        -- Cash successfully removed
-        TriggerClientEvent('chat:addMessage', player, { args = { '^2Success:', 'You have lost $' .. amount } })
-    else
-        -- Player does not have enough cash
-        TriggerClientEvent('chat:addMessage', player, { args = { '^1Error:', 'Insufficient funds' } })
-    end ]]
+		return true
+	else
+		return false
+	end
 end)
 
 -- Define the getPlayerBankBalance function
@@ -190,15 +182,3 @@ exports('getPlayerBankBalance', getPlayerBankBalance)
 exports('GetPlayerCash', GetPlayerCash)
 exports('AddPlayerCash', AddPlayerCash)
 exports('RemovePlayerCash', RemovePlayerCash)
-
-
-function IsAdmin(identifier)
-    for _, admin in ipairs(admins) do
-        if identifier == admin then
-            return true
-        end
-    end
-    return false
-end
-
-
