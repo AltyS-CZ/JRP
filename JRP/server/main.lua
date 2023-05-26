@@ -1,5 +1,5 @@
 local oxmysql = exports.oxmysql
-
+------------------------------------------------ PLEASE DO NOT TOUCH -----------------------------------------------------------------------------
 -- Load player data on server start
 AddEventHandler('onResourceStart', function(resourceName)
     if (GetCurrentResourceName() ~= resourceName) then
@@ -34,3 +34,4 @@ AddEventHandler('playerConnecting', function(playerName, setKickReason, deferral
         end
     end)
 end)
+
