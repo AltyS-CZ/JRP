@@ -1,5 +1,5 @@
 -- load the configuration file
-local Config = require('config')
+local Config = require('../config')
 
 -- create the /getpos command
 RegisterCommand('getpos', function(source, args, rawCommand)
