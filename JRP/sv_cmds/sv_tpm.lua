@@ -1,4 +1,4 @@
-local Config = require('config')
+local Config = require('../config')
 
 
 RegisterCommand('tpm', function(source, args, rawCommand)
