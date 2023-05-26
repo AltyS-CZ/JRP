@@ -1,4 +1,4 @@
-local Config = require('config')
+local Config = require('../config')
 
 function isAdmin(source)
     local identifiers = GetPlayerIdentifiers(source)
