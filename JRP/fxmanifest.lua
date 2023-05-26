@@ -29,7 +29,7 @@ shared_scripts {
 
 
 dependencies {
-    'oxymsql',
+    'oxmysql',
 }
 
 
