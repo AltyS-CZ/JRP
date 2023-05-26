@@ -1,4 +1,5 @@
 ------------------------------------ DO NOT TOUCH --------------------------------------
+------------------------------------ DO NOT TOUCH --------------------------------------
 
 
 local cash = 0
@@ -6,89 +7,60 @@ local bank = 0
 local dirtyMoney = 0
 
 
-function getPlayerId(player)
-    if type(player) == 'number' then
-        return player
-    elseif type(player) == 'string' then
-        for _, id in ipairs(GetPlayers()) do
-            if GetPlayerName(id) == player then
-                return id
-            end
-        end
-    elseif type(player) == 'userdata' then
-        return tonumber(PlayerId())
+function GetPlayerData(source, callback)
+    local playerId = tonumber(source)
+    if not playerId then
+        callback(nil)
+        return
     end
-    return nil
-end
 
------------------------------------- DO NOT TOUCH --------------------------------------
-
-
--- Function to get the player's cash
-function GetPlayerCash(source)
-    local player = source
-    local cash = 0
-
-    -- Retrieve the cash from the database
-    exports.oxmysql:execute('SELECT cash FROM users WHERE identifier = ?', { GetPlayerIdentifier(player, 0) }, function(result)
-        if result[1] ~= nil then
-            cash = tonumber(result[1].cash)
+    exports.oxmysql:execute('SELECT * FROM users WHERE id = ?', { playerId }, function(result)
+        if result and #result > 0 then
+            local playerData = result[1]
+            callback(playerData)
+        else
+            callback(nil)
         end
     end)
-
-    return cash
 end
 
--- Function to add cash to the player
-function AddPlayerCash(source, amount)
-    local player = source
-    local currentCash = GetPlayerCash(player)
 
-    -- Calculate the new cash value
-    local newCash = currentCash + amount
 
-    -- Update the cash in the database
-    exports.oxmysql:execute('UPDATE users SET cash = ? WHERE identifier = ?', { newCash, GetPlayerIdentifier(player, 0) })
-end
-
--- Function to remove cash from the player
-function RemovePlayerCash(source, amount)
-    local player = source
-    local currentCash = GetPlayerCash(player)
-
-    -- Check if the player has enough cash
-    if currentCash >= amount then
-        -- Calculate the new cash value
-        local newCash = currentCash - amount
-
-        -- Update the cash in the database
-        exports.oxmysql:execute('UPDATE users SET cash = ? WHERE identifier = ?', { newCash, GetPlayerIdentifier(player, 0) })
-        -- Cash successfully removed
-        TriggerClientEvent('chat:addMessage', player, { args = { '^2Success:', '$' .. amount ' was removed from your cash.'} })
-        return true
-    else
-        TriggerClientEvent('chat:addMessage', player, { args = { '^1Error:', 'Insufficient funds' } })
-        return false
+local function GetPlayerMoney(playerId, account)
+    -- Fetch player data from the 'users' table using the playerId
+    local playerData = exports.oxmysql:fetchSync('SELECT * FROM users WHERE id = ?', { playerId })
+    if playerData and #playerData > 0 then
+        if account == 'cash' then
+            return playerData[1].cash or 0
+        elseif account == 'bank' then
+            return playerData[1].bank or 0
+        end
     end
+    return 0
 end
 
------------------------------------- DO NOT TOUCH --------------------------------------
+local function SetPlayerMoney(playerId, account, amount)
+    -- Update the 'users' table with the new money amount
+    exports.oxmysql:execute('UPDATE users SET ' .. account .. ' = ? WHERE id = ?', { amount, playerId })
+end
 
+local function GivePlayerMoney(playerId, account, amount)
+    local currentMoney = GetPlayerMoney(playerId, account)
+    local newMoney = currentMoney + amount
+    SetPlayerMoney(playerId, account, newMoney)
+end
 
-
--- Define the getPlayerBankBalance function
-local function getPlayerBankBalance(playerId)
-    -- Perform the database query to fetch the bank balance
-    -- Replace this with your actual database query code
-    local bankBalance = 0 -- Replace with your database retrieval logic
-
-    -- Return the bank balance
-    return bankBalance
+local function RemovePlayerMoney(playerId, account, amount)
+    local currentMoney = GetPlayerMoney(playerId, account)
+    if currentMoney >= amount then
+        local newMoney = currentMoney - amount
+        SetPlayerMoney(playerId, account, newMoney)
+    end
 end
 
 
 --- Get player date such as cash, bank and dirty money
-local function getPlayerData(player, callback)
+function getPlayerData(player, callback)
     local playerId = tonumber(player)
     local identifiers = GetPlayerIdentifiers(playerId)
     local identifier = identifiers[1]
@@ -111,131 +83,64 @@ local function getPlayerData(player, callback)
     end)
 end
 
-------------- PLAYER INFO COMMAND ----------------
-RegisterCommand("info", function(source, args)
-    local player = source
-    getPlayerData(player, function(data)
-        if data ~= nil then
-            local message = "Cash: $" .. data.cash .. ", Bank: $" .. data.bank .. ", Dirty Money: $" .. data.dirty_money .. ", Job: " .. data.job
-            TriggerClientEvent('chat:addMessage', player, {args = {"Server", message}})
+RegisterCommand('info', function(source, args)
+    getPlayerData(source, function(playerData)
+        if playerData then
+            local cash = playerData.cash
+            local bank = playerData.bank
+            local message = string.format("Cash: $%s | Bank: $%s", cash, bank)
+            TriggerClientEvent('chatMessage', source, "^4[INFO]", { 255, 255, 255 }, message)
         else
-            TriggerClientEvent('chat:addMessage', player, {args = {"Server", "Unable to retrieve player data."}})
+            TriggerClientEvent('chatMessage', source, "^1[ERROR]", { 255, 255, 255 }, "Failed to retrieve player data.")
         end
     end)
-end)
-
-function SavePlayerData(identifier, playerId, playerData)
-    exports.oxmysql:execute('UPDATE players SET cash = @cash, bank = @bank WHERE identifier = @identifier AND player_id = @playerId',
-        {
-            ['@playerId'] = playerId,
-            ['@identifier'] = identifier,
-            ['@cash'] = playerData.cash,
-            ['@bank'] = playerData.bank
-        }
-    )
-end
-
------------------------------------- DO NOT TOUCH --------------------------------------
+end, false)
 
 
-function SetPlayerCash(identifier, playerId, amount, account)
-    -- Retrieve the player's current cash and bank data based on the identifier and player ID
-    local playerData = GetPlayerData(identifier, playerId)
+RegisterCommand('givemoney', function(source, args)
+    local playerId = tonumber(args[1])
+    local account = args[2]
+    local amount = tonumber(args[3])
 
-    -- Update the cash or bank based on the provided account
-    if account == "cash" then
-        playerData.cash = playerData.cash + amount
-    elseif account == "bank" then
-        playerData.bank = playerData.bank + amount
+    if not playerId or not account or not amount then
+        TriggerClientEvent('chatMessage', source, "^1[ERROR]", {255, 255, 255}, "Invalid command usage. Correct syntax: /givemoney [playerId] [account] [amount]")
+        return
     end
 
-    -- Save the updated player data
-    SavePlayerData(identifier, playerId, playerData)
-end
-------------------------------------SERVER EVENTS---------------------------------------
-RegisterServerEvent("jrp:giveMoney")
-AddEventHandler("jrp:giveMoney", function(targetId, amount, account)
-    local source = source
-
-    getPlayerData(targetId, function(data)
-        if not data then
-            TriggerClientEvent("chatMessage", source, "^1ERROR:", {255, 255, 255}, "Failed to give $" .. amount .. " from player ID " .. targetId .. "'s " .. account)
-            return
+    getPlayerData(playerId, function(playerData)
+        if playerData then
+            local currentAmount = playerData[account]
+            local newAmount = currentAmount + amount
+            exports.oxmysql:execute('UPDATE users SET ' .. account .. ' = ? WHERE identifier = ?', { newAmount, playerData.identifier })
+            TriggerClientEvent('chatMessage', source, "^2[SUCCESS]", {255, 255, 255}, "Money given successfully.")
+        else
+            TriggerClientEvent('chatMessage', source, "^1[ERROR]", {255, 255, 255}, "Player data not found.")
         end
-
-        if account == "cash" then
-            data.cash = data.cash + amount
-        elseif account == "bank" then
-            data.bank = data.bank + amount
-        elseif account == "dirty" then
-            data.dirtyMoney = data.dirtyMoney + amount
-        end
-
-        -- Save the updated player data
-        savePlayerData(targetId, data)
-
     end)
-end)
+end, true)
 
-RegisterServerEvent("jrp:removeMoney")
-AddEventHandler("jrp:removeMoney", function(targetId, amount, account)
-    local source = source
 
-    getPlayerData(targetId, function(data)
-        if not data then
-            print('player not found')
-            return
-        end
+RegisterCommand('removemoney', function(source, args)
+    local playerId = tonumber(args[1])
+    local account = args[2]
+    local amount = tonumber(args[3])
 
-        if account == "cash" then
-            if data.cash >= amount then
-                data.cash = data.cash - amount
-            else
-				TriggerClientEvent("chatMessage", source, "^1ERROR:", {255, 255, 255}, "Failed to remove $" .. amount .. " from player ID " .. targetId .. "'s " .. account)
+    if not playerId or not account or not amount then
+        TriggerClientEvent('chatMessage', source, "^1[ERROR]", {255, 255, 255}, "Invalid command usage. Correct syntax: /removemoney [playerId] [account] [amount]")
+        return
+    end
 
-                return
+    getPlayerData(playerId, function(playerData)
+        if playerData then
+            local currentAmount = playerData[account]
+            local newAmount = currentAmount - amount
+            if newAmount < 0 then
+                newAmount = 0
             end
-        elseif account == "bank" then
-            if data.bank >= amount then
-                data.bank = data.bank - amount
-            else
-                -- Not enough money in the bank
-                return
-            end
+            exports.oxmysql:execute('UPDATE users SET ' .. account .. ' = ? WHERE identifier = ?', { newAmount, playerData.identifier })
+            TriggerClientEvent('chatMessage', source, "^2[SUCCESS]", {255, 255, 255}, "Money removed successfully.")
+        else
+            TriggerClientEvent('chatMessage', source, "^1[ERROR]", {255, 255, 255}, "Player data not found.")
         end
-
-        -- Save the updated player data
-        savePlayerData(targetId, data)
-
     end)
-end)
-
------------------------------------- DO NOT TOUCH --------------------------------------
-
-
-RegisterCommand("givemoney", function(source, args)
-    local targetId = tonumber(args[1])
-    local amount = tonumber(args[2])
-    local account = args[3]
-
-    if targetId ~= nil and amount ~= nil and account ~= nil then
-        TriggerEvent("jrp:giveMoney", targetId, amount, account)
-        TriggerClientEvent("chatMessage", source, "^2SUCCESS", {255, 255, 255}, "You have given $" .. amount .. " to player ID " .. targetId .. "'s " .. account)
-    else
-        TriggerClientEvent("chatMessage", source, "^1ERROR", {255, 255, 255}, "Invalid usage! Correct usage: /givemoney [targetID] [amount] [account]")
-    end
-end)
-
-RegisterCommand("removemoney", function(source, args)
-    local targetId = tonumber(args[1])
-    local amount = tonumber(args[2])
-    local account = args[3]
-
-    if targetId ~= nil and amount ~= nil and account ~= nil then
-        TriggerEvent("jrp:removeMoney", targetId, amount, account)
-        TriggerClientEvent("chatMessage", source, "^2SUCCESS", {255, 255, 255}, "You have removed $" .. amount .. " from player ID " .. targetId .. "'s " .. account)
-    else
-        TriggerClientEvent("chatMessage", source, "^1ERROR", {255, 255, 255}, "Invalid usage! Correct usage: /removemoney [targetID] [amount] [account]")
-    end
-end)
-
+end, true)
