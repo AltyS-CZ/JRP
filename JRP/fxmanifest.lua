@@ -4,6 +4,7 @@ game 'gta5'
 author 'JaxDanger'
 description 'Custom Economy Framework'
 version '0.0.7'
+lua54 'yes'
 
 
 server_scripts {
