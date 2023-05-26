@@ -5,6 +5,7 @@ author 'JaxDanger'
 description 'Custom Economy Framework'
 version '0.0.6'
 
+
 server_scripts {
     '@mysql-async/lib/MySQL.lua',
     'server/main.lua',
@@ -17,17 +18,9 @@ client_scripts {
 
 dependencies {
     'menuv',
-    'oxmysql',
-    'ox_lib',
+    'jrp_commands',
+    'jrp_inv',
 }
-
-exports {
-    'getPlayerBankBalance',
-    'GetPlayerCash',
-    'AddPlayerCash',
-    'RemovePlayerCash',
-}
-
 
 
 
