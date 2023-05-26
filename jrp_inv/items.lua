@@ -1,27 +1,84 @@
 -- main script
 local Config = require('config')
 
--- To access the item_list, use Config.item_list
+function IsItemInCategory(item, category)
+    for _, cat in ipairs(Config.item_list.categories) do
+        for _, itemData in ipairs(cat.items) do
+            if itemData.item == item then
+                return cat.name == category
+            end
+        end
+    end
+    return false
+end
 
+
+RegisterNetEvent('checkItemCategory')
+AddEventHandler('checkItemCategory', function(item)
+    local category = nil
+
+    for _, cat in ipairs(Config.item_list.categories) do
+        for _, itemData in ipairs(cat.items) do
+            if itemData.item == item then
+                category = cat.name
+                break
+            end
+        end
+        if category then
+            break
+        end
+    end
+
+    if category and string.lower(category) == "drinks" then
+        TriggerClientEvent("drinkWater", source)
+        print("Drink")
+    elseif category and string.lower(category) == "food" then
+        print("Food")
+    elseif category and string.lower(category) == "items" then
+        print("Item")
+    end
+end)
+
+
+-- To access the item_list, use Config.item_list
 function UseItem(item)
-    local selectedItem = Config.item_list[item] -- Get the selected item from the config
+    local selectedItem = nil
+    for _, categoryData in ipairs(Config.item_list.categories) do
+        for _, itemData in ipairs(categoryData.items) do
+            if itemData.item == item or itemData.name == item then
+                selectedItem = itemData
+                break
+            end
+        end
+        if selectedItem then
+            break
+        end
+    end
 
     if selectedItem then
-        TriggerServerEvent('useItem', selectedItem)
+        TriggerServerEvent('useItem', selectedItem.item)
     else
         print("Selected item is not valid")
     end
 end
 
-RegisterServerEvent('useItem')
+
+
+
+RegisterNetEvent('useItem')
 AddEventHandler('useItem', function(item)
     local _source = source
     local identifier = GetPlayerIdentifier(_source)
 
     local selectedItem = nil
-    for _, configItem in ipairs(Config.item_list) do
-        if configItem.item == item or configItem.name == item then
-            selectedItem = configItem
+    for _, category in ipairs(Config.item_list.categories) do
+        for _, configItem in ipairs(category.items) do
+            if configItem.item == item or configItem.name == item then
+                selectedItem = configItem
+                break
+            end
+        end
+        if selectedItem then
             break
         end
     end
@@ -48,6 +105,9 @@ AddEventHandler('useItem', function(item)
                             end
                         end
                     )
+
+                    -- Trigger the checkItemCategory event
+                    TriggerEvent('checkItemCategory', _source, item)
                 end
             end
         )
@@ -56,6 +116,11 @@ AddEventHandler('useItem', function(item)
         TriggerClientEvent('chat:addMessage', _source, { args = { '^1Error:', 'Invalid item: ' .. item } })
     end
 end)
+
+
+
+
+
 
 
 
