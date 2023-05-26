@@ -1,3 +1,4 @@
+-- Event for drinking water
 RegisterNetEvent('drinkWater')
 AddEventHandler('drinkWater', function()
     lib.progressBar({
