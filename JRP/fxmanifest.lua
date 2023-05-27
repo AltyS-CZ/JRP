@@ -3,7 +3,7 @@ game 'gta5'
 
 author 'JaxDanger'
 description 'Custom Economy Framework'
-version '0.0.7'
+version '0.0.8'
 lua54 'yes'
 
 
