@@ -35,10 +35,6 @@ Citizen.CreateThread(function()
         if IsEntityDead(playerPed) and not showText then
             showText = true
             deathPosition = GetEntityCoords(playerPed)
-            TriggerEvent("chat:addMessage", {
-                color = { 255, 0, 0 },
-                args = { "[DEATH]", "You died! Press [E] to respawn or [R] to revive." }
-            })
         elseif not IsEntityDead(playerPed) then
             showText = false
             deathPosition = nil
