@@ -1,7 +1,11 @@
 -- Configuration
-local respawnCoords = vector3(123.45, 67.89, 0.0) -- Adjust the coordinates as needed
+local respawnCoords = vector3(686.01, 576.94, 130.44) -- Configuration-- Configuration
 local showText = false
 local deathPosition = nil
+
+
+--------- PLEASE DO NOT TOUCH ------------
+
 
 -- Display text on screen
 function DrawRespawnText()
@@ -21,12 +25,12 @@ end
 -- Check player death
 Citizen.CreateThread(function()
     -- Disable auto-spawn by modifying spawnmanager resource directly
-    TriggerEvent('spawnmanager:spawnPlayer')
-    TriggerEvent('spawnmanager:setAutoSpawn', false)
     Citizen.Wait(0)
 
     while true do
         Citizen.Wait(0)
+		exports.spawnmanager:setAutoSpawn(false)
+
         local playerPed = PlayerPedId()
         if IsEntityDead(playerPed) and not showText then
             showText = true
