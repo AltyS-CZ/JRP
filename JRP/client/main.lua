@@ -1,5 +1,5 @@
 -- Configuration
-local respawnCoords = vector3(686.01, 576.94, 130.44) -- Configuration-- Configuration
+local respawnCoords = vector3(123.4, 567.8, 912.3) -- Example coordinates
 local showText = false
 local deathPosition = nil
 
