@@ -15,6 +15,7 @@ server_scripts {
     'sv_cmds/sv_dv.lua',
     'sv_cmds/sv_getpos.lua',
     'sv_cmds/sv_tpm.lua',
+    'server/health.lua',
 }
 
 client_scripts {
@@ -22,6 +23,7 @@ client_scripts {
     'cl_cmds/cl_car.lua',
     'cl_cmds/cl_dv.lua',
     'cl_cmds/cl_tpm.lua',
+    'client/health.lua',
 }
 
 shared_scripts {
