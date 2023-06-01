@@ -16,21 +16,17 @@
 
 -- Dumping structure for table fivem_economy.users
 CREATE TABLE `users` (
-	`id` INT(11) NOT NULL AUTO_INCREMENT,
 	`identifier` VARCHAR(255) NOT NULL COLLATE 'utf8mb4_general_ci',
 	`cash` INT(11) NOT NULL DEFAULT '0',
 	`bank` INT(11) NOT NULL DEFAULT '0',
 	`dirty_money` INT(11) NOT NULL DEFAULT '0',
-	`job` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_general_ci',
-	`position` LONGTEXT NULL DEFAULT NULL COLLATE 'utf8mb4_bin',
-	`salary` INT(11) NOT NULL DEFAULT '0',
-	PRIMARY KEY (`id`) USING BTREE,
-	CONSTRAINT `position` CHECK (json_valid(`position`))
+	`job` VARCHAR(255) NOT NULL DEFAULT 'unemployed' COLLATE 'utf8mb4_general_ci',
+	PRIMARY KEY (`identifier`) USING BTREE
 )
 COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
-AUTO_INCREMENT=4
 ;
+
 
 CREATE TABLE `player_inventory` (
 	`identifier` VARCHAR(40) NOT NULL COLLATE 'utf8mb4_general_ci',
