@@ -27,7 +27,6 @@ COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 ;
 
-
 CREATE TABLE `player_inventory` (
 	`identifier` VARCHAR(40) NOT NULL COLLATE 'utf8mb4_general_ci',
 	`item` VARCHAR(50) NOT NULL COLLATE 'utf8mb4_general_ci',
@@ -37,6 +36,15 @@ CREATE TABLE `player_inventory` (
 COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 ;
+
+CREATE TABLE `job_list` (
+	`job` VARCHAR(64) NOT NULL COLLATE 'utf8mb4_general_ci',
+	PRIMARY KEY (`job`) USING BTREE
+)
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+;
+
 
 
 
