@@ -16,6 +16,8 @@ server_scripts {
     'sv_cmds/sv_getpos.lua',
     'sv_cmds/sv_tpm.lua',
     'server/health.lua',
+    'sv_cmds/sv_setjob.lua',
+    'sv_cmds/sv_job.lua',
 }
 
 client_scripts {
