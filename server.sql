@@ -46,15 +46,6 @@ COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 ;
 
-CREATE TABLE `job_list` (
-	`job` VARCHAR(64) NOT NULL COLLATE 'utf8mb4_general_ci',
-	PRIMARY KEY (`job`) USING BTREE
-)
-COLLATE='utf8mb4_general_ci'
-ENGINE=InnoDB
-;
-
-
 
 
 
