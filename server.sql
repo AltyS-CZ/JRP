@@ -38,22 +38,6 @@ COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 ;
 
--- Dumping structure for table fivem_economy.job_list
-CREATE TABLE IF NOT EXISTS `job_list` (
-  `job` varchar(64) NOT NULL,
-  PRIMARY KEY (`job`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- Dumping data for table fivem_economy.job_list: ~0 rows (approximately)
-DELETE FROM `job_list`;
-/*!40000 ALTER TABLE `job_list` DISABLE KEYS */;
-INSERT INTO `job_list` (`job`) VALUES
-	('citizen'),
-	('mechanic'),
-	('police');
-/*!40000 ALTER TABLE `job_list` ENABLE KEYS */;
-
-
 
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
