@@ -15,7 +15,7 @@
 
 
 -- Dumping structure for table fivem_economy.users
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
 	`identifier` VARCHAR(255) NOT NULL COLLATE 'utf8mb4_general_ci',
 	`cash` INT(11) NOT NULL DEFAULT '0',
 	`bank` INT(11) NOT NULL DEFAULT '0',
@@ -28,7 +28,7 @@ ENGINE=InnoDB
 ;
 
 
-CREATE TABLE `player_inventory` (
+CREATE TABLE IF NOT EXISTS `player_inventory` (
 	`identifier` VARCHAR(40) NOT NULL COLLATE 'utf8mb4_general_ci',
 	`item` VARCHAR(50) NOT NULL COLLATE 'utf8mb4_general_ci',
 	`count` INT(11) NOT NULL,
@@ -38,13 +38,20 @@ COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 ;
 
-CREATE TABLE `job_list` (
-	`job` VARCHAR(64) NOT NULL COLLATE 'utf8mb4_general_ci',
-	PRIMARY KEY (`job`) USING BTREE
-)
-COLLATE='utf8mb4_general_ci'
-ENGINE=InnoDB
-;
+-- Dumping structure for table fivem_economy.job_list
+CREATE TABLE IF NOT EXISTS `job_list` (
+  `job` varchar(64) NOT NULL,
+  PRIMARY KEY (`job`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Dumping data for table fivem_economy.job_list: ~0 rows (approximately)
+DELETE FROM `job_list`;
+/*!40000 ALTER TABLE `job_list` DISABLE KEYS */;
+INSERT INTO `job_list` (`job`) VALUES
+	('citizen'),
+	('mechanic'),
+	('police');
+/*!40000 ALTER TABLE `job_list` ENABLE KEYS */;
 
 
 
